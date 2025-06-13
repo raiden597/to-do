@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "To-Do List",
-  description: "Made by Saran",
+  title: "To-Do App",
+  description: "A To-do App to track all your tasks in one place.",
 };
 
 export default function RootLayout({
