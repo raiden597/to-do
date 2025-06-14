@@ -1,22 +1,25 @@
 @import "tailwindcss";
 
 :root {
-  --background: #D1FAE5;
-  --foreground: #000;
+  --background: #DDE9D2;       /* Soft sage green */
+  --foreground: #1F2B22;       /* Dark, earthy green-gray */
 }
 
 html.dark {
-  --background: #0a0a0a;
-  --foreground: #ededed;
+  --background: #0F1410;       /* Deep forest gray */
+  --foreground: #E4EFE7;       /* Pale minty-sage */
 }
 
 body {
   height: 100%;
   background: var(--background);
   color: var(--foreground);
-  font-family: system-ui, sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
+  line-height: 1.6;
+  font-weight: 500;
 }
 
-:root, .dark {
+:root,
+.dark {
   transition: background-color 0.4s ease, color 0.4s ease;
 }
