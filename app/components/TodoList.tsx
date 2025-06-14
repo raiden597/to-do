@@ -68,7 +68,7 @@ export default function TodoList() {
           onKeyDown={(e) => e.key === 'Enter' && addTodo()}
           placeholder="Add a new task..."
           aria-label="Task input"
-          className="w-full px-5 py-3 rounded-[1.5rem] bg-white/10 text-[var(--foreground)] placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-white shadow-inner transition-all"
+          className="w-full px-5 py-3 rounded-[1.5rem] bg-white/10 text-[var(--foreground)] placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-inner transition-all"
           maxLength={100}
           autoFocus
         />
