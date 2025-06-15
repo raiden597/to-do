@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import TodoItem from './TodoItem';
 import { AnimatePresence, Reorder } from 'framer-motion';
 import { v4 as uuidv4 } from 'uuid';
-import { createEvents } from 'ics';
+import { createEvents, EventAttributes } from 'ics';
 
 type Todo = {
   id: string;
@@ -55,37 +55,54 @@ export default function TodoList() {
     setTodos((prev) => prev.filter((todo) => todo.id !== id));
   }, []);
 
-  const exportToCalendar = () => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
+const exportToCalendar = () => {
+  if (todos.length === 0) {
+    alert('No tasks to export!');
+    return;
+  }
 
-    const events = todos.map((todo, index) => ({
+  const baseDate = new Date();
+  baseDate.setDate(baseDate.getDate() + 1); // start from tomorrow
+
+  const events: EventAttributes[] = todos.map((todo, index) => {
+    const totalHour = 9 + index;
+    const dayOffset = Math.floor(totalHour / 24);
+    const hour = totalHour % 24;
+
+    const eventDate = new Date(baseDate);
+    eventDate.setDate(baseDate.getDate() + dayOffset);
+
+    const start: [number, number, number, number, number] = [
+      eventDate.getFullYear(),
+      eventDate.getMonth() + 1, // ics expects 1-based months
+      eventDate.getDate(),
+      hour,
+      0,
+    ];
+
+    return {
       title: todo.text,
-      start: [
-        tomorrow.getFullYear(),
-        tomorrow.getMonth() + 1,
-        tomorrow.getDate(),
-        9 + index, // Each task at 9AM + index
-        0,
-      ],
+      start,
       duration: { hours: 1 },
-    }));
+      status: 'CONFIRMED',
+      busyStatus: 'BUSY',
+    };
+  });
 
-    createEvents(events, (error, value) => {
-      if (error) {
-        console.error('Error generating calendar file:', error);
-        return;
-      }
+  createEvents(events, (error, value) => {
+    if (error) {
+      console.error('Error generating calendar file:', error);
+      return;
+    }
 
-      const blob = new Blob([value], { type: 'text/calendar' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'todos.ics';
-      link.click();
-    });
-  };
-
+    const blob = new Blob([value], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'todos.ics';
+    link.click();
+  });
+};
 
   return (
     <div className="bg-white/10 dark:bg-white/10 backdrop-blur-2xl border border-white/20 dark:border-white/10 rounded-[2.5rem] p-6 sm:p-8 w-full max-w-xl mx-auto shadow-[0_8px_30px_rgba(0,0,0,0.1)] transition-all duration-300">
