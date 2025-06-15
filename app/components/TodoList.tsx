@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import TodoItem from './TodoItem';
 import { AnimatePresence, Reorder } from 'framer-motion';
 import { v4 as uuidv4 } from 'uuid';
+import { createEvents } from 'ics';
 
 type Todo = {
   id: string;
@@ -54,13 +55,45 @@ export default function TodoList() {
     setTodos((prev) => prev.filter((todo) => todo.id !== id));
   }, []);
 
+  const exportToCalendar = () => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const events = todos.map((todo, index) => ({
+      title: todo.text,
+      start: [
+        tomorrow.getFullYear(),
+        tomorrow.getMonth() + 1,
+        tomorrow.getDate(),
+        9 + index, // Each task at 9AM + index
+        0,
+      ],
+      duration: { hours: 1 },
+    }));
+
+    createEvents(events, (error, value) => {
+      if (error) {
+        console.error('Error generating calendar file:', error);
+        return;
+      }
+
+      const blob = new Blob([value], { type: 'text/calendar' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'todos.ics';
+      link.click();
+    });
+  };
+
+
   return (
     <div className="bg-white/10 dark:bg-white/10 backdrop-blur-2xl border border-white/20 dark:border-white/10 rounded-[2.5rem] p-6 sm:p-8 w-full max-w-xl mx-auto shadow-[0_8px_30px_rgba(0,0,0,0.1)] transition-all duration-300">
       <h1 className="text-3xl sm:text-4xl font-semibold text-center text-[var(--foreground)] mb-6 sm:mb-8 tracking-tight drop-shadow-sm">
         📝 To-Do
       </h1>
 
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+      <div className="flex flex-col sm:flex-row gap-3 mb-2">
         <input
           type="text"
           value={task}
@@ -80,6 +113,12 @@ export default function TodoList() {
         </button>
         
       </div>
+      <button
+        onClick={exportToCalendar}
+        className="w-full mb-2 px-6 py-3 rounded-[1.5rem] bg-green-500 hover:bg-green-600 active:scale-95 text-white shadow-md transition-transform duration-150"
+      >
+        📅 Export to Calendar
+      </button>
       <p className="text-center text-xs text-zinc-400 mb-4 sm:mb-6">
   (Swipe ➡ to complete, ⬅ to delete)
 </p>
